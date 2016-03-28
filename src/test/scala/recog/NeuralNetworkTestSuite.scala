@@ -37,7 +37,7 @@ class NeuralNetworkTestSuite extends FunSuite{
     val neuron2 = Neuron(theta2)
     assert(neuron2.apply(List(1.0, 8.0)) === 4.0)
     
-    val network = NeuralNetwork(List(neuron1), List(neuron2))
+    val network = NeuralNetwork(input.length, List(neuron1), List(neuron2))
     assert(network(input) == List(4.0))
   }
   
@@ -61,7 +61,7 @@ class NeuralNetworkTestSuite extends FunSuite{
     assert(neuron21.apply(1.0::List(8.0,14.0)) === 15.0)
     assert(neuron22.apply(1.0::List(8.0,14.0)) === 36.0)
     
-    val network = NeuralNetwork(List(neuron11,neuron12), List(neuron21, neuron22))
+    val network = NeuralNetwork(input.length, List(neuron11,neuron12), List(neuron21, neuron22))
     assert(network.apply(input) === List(15.0, 36.0))
     
   }
@@ -86,7 +86,7 @@ class NeuralNetworkTestSuite extends FunSuite{
     assert(neuron21.apply(1.0::List(0.55,0.11)) === 0.33)
     assert(neuron22.apply(1.0::List(0.55,0.11)) === 0.066)
     
-    val network = NeuralNetwork(List(neuron11,neuron12), List(neuron21, neuron22))
+    val network = NeuralNetwork(input.length, List(neuron11,neuron12), List(neuron21, neuron22))
     assert(network.apply(input) === List(0.33, 0.066))
     
   }
@@ -102,18 +102,35 @@ class NeuralNetworkTestSuite extends FunSuite{
     val neuron21 = Neuron(theta21)
     val neuron22 = Neuron(theta22)
     val lambda = 0
-    val network = NeuralNetwork(List(neuron11,neuron12), List(neuron21, neuron22))
+    val network = NeuralNetwork(2, List(neuron11,neuron12), List(neuron21, neuron22))
     
     val inputTraining1 = List(0.5, 0.6)
     val expectedTraining1 = List(0.33,0.066)
     
     val trainingSet = List( (inputTraining1,expectedTraining1) )
+    val trainer = Trainer(network)
     
-    assert(network.costFunction(trainingSet, lambda) > 0.87734 && network.costFunction(trainingSet, lambda) < 0.87735)
+    assert(trainer.costFunction(trainingSet, lambda) > 0.87734 && trainer.costFunction(trainingSet, lambda) < 0.87735)
   }
   
   test("Sigmoid gradient") {
-    assert(NeuralNetwork(List(),List()).sigmoidGradient(0) === 0.25)
+    assert(Trainer(NeuralNetwork(1, Nil,Nil)).sigmoidGradient(0) === 0.25)
+  }
+  
+  test("Epsilon init for Hidden for 25-10 with 400 inputs neural network") {
+    
+    val hiddenLayer = List.fill(25)(Neuron(Nil))
+    val outputLayer = List.fill(10)(Neuron(Nil))
+    val epsilon = Trainer(NeuralNetwork(400, hiddenLayer, outputLayer)).epsilonInitForHidden
+    assert(epsilon > 0.11 && epsilon < 0.13)
+  }
+  
+  test("Epsilon init for Output for 25-10 with 400 inputs neural network") {
+    
+    val hiddenLayer = List.fill(25)(Neuron(Nil))
+    val outputLayer = List.fill(10)(Neuron(Nil))
+    val epsilon = Trainer(NeuralNetwork(400, hiddenLayer, outputLayer)).epsilonInitForOutput
+    assert(epsilon > 0.40 && epsilon < 0.42)
   }
   
 }

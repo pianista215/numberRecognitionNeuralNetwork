@@ -7,7 +7,7 @@ object Main extends App {
   
   val input = List(8.0,9.0,10.0)
   
-  val network = NeuralNetwork(List(Neuron(theta1)), List(Neuron(theta2)))
+  val network = NeuralNetwork(input.length,List(Neuron(theta1)), List(Neuron(theta2)))
   println("Final  "+network.apply(input))
   
 }
