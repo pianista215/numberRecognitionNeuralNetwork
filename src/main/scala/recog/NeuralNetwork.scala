@@ -22,14 +22,40 @@ case class NeuralNetwork(
     hiddenLayer: List[Neuron],
     outputLayer: List[Neuron]) {
   
+  type Input = List[Double]
+  type Result = List[Double]
+  type TrainingSet = List[(Input, Result)]
   
-  def apply(input: List[Double]): List[Double] = {
+  
+  def apply(input: Input): Result = {
     val inputWithBias = 1.0 :: input
     val resultsFromHiddenLayer = hiddenLayer map { x => x.apply(inputWithBias) }
     println("Results from HiddenLayer")
     println(resultsFromHiddenLayer)
     val resultHiddenWithBias = 1.0 :: resultsFromHiddenLayer
     outputLayer map { x => x.apply(resultHiddenWithBias)}
+  }
+  
+  /**
+   * Calculate the cost of the current neural network for a training set given with the expected results
+   * (As we are on a classifying problem we expect a vector of (1,0,0,0...) for detect a 0
+   * (0,1,0,0...) for detect a 1 etc
+   * 
+   */
+  def costFunction(trainingSet: TrainingSet):Double = {
+    val costPerExample = trainingSet map {
+      case (input,expected) => {
+        val calculated = apply(input)
+        val calcAndExp = calculated zip expected
+        val diff = calcAndExp map {
+          case(calc,exp) => Math.abs(-exp * Math.log(calc) - (1 - exp)*Math.log(1 - calc) )
+        }
+        diff.sum
+      }
+    }
+    costPerExample.sum/trainingSet.length
+    
+    //TODO: Regularization
   }
   
 }
