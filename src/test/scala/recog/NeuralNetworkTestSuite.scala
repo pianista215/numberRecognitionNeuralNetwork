@@ -66,4 +66,51 @@ class NeuralNetworkTestSuite extends FunSuite{
     
   }
   
+  test("Neural Network (2 - 2) with 2 outputs from 0-1 (classification)") {
+    val theta11 = List(0.0, 0.5, 0.5)
+    val theta12 = List(0.0, 0.1, 0.1)
+    
+    val input = List(0.5, 0.6)
+    
+    val neuron11 = Neuron(theta11)
+    val neuron12 = Neuron(theta12)
+    
+    val theta21 = List(0.0, 0.5, 0.5)
+    val theta22 = List(0.0, 0.1, 0.1)
+    val neuron21 = Neuron(theta21)
+    val neuron22 = Neuron(theta22)
+    
+    assert(neuron11.apply(1.0::input) === 0.55)
+    assert(neuron12.apply(1.0::input) === 0.11)
+    
+    assert(neuron21.apply(1.0::List(0.55,0.11)) === 0.33)
+    assert(neuron22.apply(1.0::List(0.55,0.11)) === 0.066)
+    
+    val network = NeuralNetwork(List(neuron11,neuron12), List(neuron21, neuron22))
+    assert(network.apply(input) === List(0.33, 0.066))
+    
+  }
+  
+  //TODO: Should add more tests for the cost function
+  test("Cost function basic") {
+    val theta11 = List(0.0, 0.5, 0.5)
+    val theta12 = List(0.0, 0.1, 0.1)
+    val neuron11 = Neuron(theta11)
+    val neuron12 = Neuron(theta12)
+    val theta21 = List(0.0, 0.5, 0.5)
+    val theta22 = List(0.0, 0.1, 0.1)
+    val neuron21 = Neuron(theta21)
+    val neuron22 = Neuron(theta22)
+    val lambda = 0
+    val network = NeuralNetwork(List(neuron11,neuron12), List(neuron21, neuron22))
+    
+    val inputTraining1 = List(0.5, 0.6)
+    val expectedTraining1 = List(0.33,0.066)
+    
+    val trainingSet = List( (inputTraining1,expectedTraining1) )
+    
+    assert(network.costFunction(trainingSet, lambda) > 0.87734 && network.costFunction(trainingSet, lambda) < 0.87735)
+    
+  }
+  
 }

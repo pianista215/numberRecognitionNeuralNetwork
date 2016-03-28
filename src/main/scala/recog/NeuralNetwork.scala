@@ -42,20 +42,24 @@ case class NeuralNetwork(
    * (0,1,0,0...) for detect a 1 etc
    * 
    */
-  def costFunction(trainingSet: TrainingSet):Double = {
+  def costFunction(trainingSet: TrainingSet, lambda: Double):Double = {
     val costPerExample = trainingSet map {
       case (input,expected) => {
         val calculated = apply(input)
         val calcAndExp = calculated zip expected
+        println("CalcAndExp "+calcAndExp)
         val diff = calcAndExp map {
           case(calc,exp) => Math.abs(-exp * Math.log(calc) - (1 - exp)*Math.log(1 - calc) )
         }
         diff.sum
       }
     }
-    costPerExample.sum/trainingSet.length
+    val noReg = costPerExample.sum/trainingSet.length
     
-    //TODO: Regularization
+    val hiddenReg = hiddenLayer.foldLeft(0.0)((a,b) => a + b.thetasSumSquare)
+    val outputReg = outputLayer.foldLeft(0.0)((a,b) => a + b.thetasSumSquare)
+    
+    noReg + lambda/(2*trainingSet.length) * (hiddenReg + outputReg)
   }
   
 }

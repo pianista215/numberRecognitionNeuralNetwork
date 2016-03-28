@@ -18,4 +18,9 @@ case class Neuron(theta: List[Double]) {
     multiplied.sum 
   }
   
+  /**
+   * Helper for cost function with regularization
+   */
+  def thetasSumSquare: Double = theta.foldLeft(0.0)((a,b) => a + b*b)
+  
 }
