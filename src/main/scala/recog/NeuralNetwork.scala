@@ -62,4 +62,11 @@ case class NeuralNetwork(
     noReg + lambda/(2*trainingSet.length) * (hiddenReg + outputReg)
   }
   
+  /**
+   * Gradient of the sigmoid (used for calculate gradient)
+   */
+  def sigmoidGradient(x: Double): Double =  sigmoid(x)*(1-sigmoid(x))
+  
+  def sigmoid(x:Double): Double = 1 / (1 + Math.exp(x))
+  
 }

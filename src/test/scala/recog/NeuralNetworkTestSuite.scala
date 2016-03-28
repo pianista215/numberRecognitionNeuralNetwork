@@ -110,7 +110,10 @@ class NeuralNetworkTestSuite extends FunSuite{
     val trainingSet = List( (inputTraining1,expectedTraining1) )
     
     assert(network.costFunction(trainingSet, lambda) > 0.87734 && network.costFunction(trainingSet, lambda) < 0.87735)
-    
+  }
+  
+  test("Sigmoid gradient") {
+    assert(NeuralNetwork(List(),List()).sigmoidGradient(0) === 0.25)
   }
   
 }
