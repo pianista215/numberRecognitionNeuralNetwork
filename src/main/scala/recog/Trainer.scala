@@ -1,5 +1,7 @@
 package recog
 
+import scala.util.Random
+
 /**
  * In charge of train the Neural Network selecting initial values for theta
  * @author Pianista
@@ -34,13 +36,6 @@ case class Trainer(network : NeuralNetwork) {
   }
   
   /**
-   * Gradient of the sigmoid (used for calculate gradient)
-   */
-  def sigmoidGradient(x: Double): Double =  sigmoid(x)*(1-sigmoid(x))
-  
-  def sigmoid(x:Double): Double = 1 / (1 + Math.exp(x))
-  
-  /**
    * From Stanford Coursera Machine Learning Course. Recommendation
    */
   def epsilonInitForHidden: Double = Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.inputLayer)
@@ -50,4 +45,22 @@ case class Trainer(network : NeuralNetwork) {
    */
   def epsilonInitForOutput: Double = Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.outputLayer.length)
   
+  /**
+   * Generate a random theta for a neuron in the Hidden layer
+   */
+  def initThetaForHidden: List[Double] = 
+    List.fill(network.inputLayer+1)(-epsilonInitForHidden + (2*epsilonInitForHidden)* Random.nextDouble())
+ 
+  /**
+   * Generate a random theta for a neuron in the Output layer
+   */
+  def initThetaForOutput : List[Double] = 
+    List.fill(network.hiddenLayer.length+1)(-epsilonInitForOutput + (2*epsilonInitForOutput)* Random.nextDouble())
+    
+    
+  def dessuf3(trainingExample: Input, expectedResult: Result): List[Double] = {
+    val result = network.apply(trainingExample)
+    val zipped = result zip expectedResult
+    zipped map { case (res,exp) => res - exp }
+  }
 }

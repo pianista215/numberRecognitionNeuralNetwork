@@ -24,14 +24,34 @@ case class NeuralNetwork(
     outputLayer: List[Neuron]) {
   
   
+  /**
+   * Sigmoid(z3)
+   */
   def apply(input: Input): Result = {
-    val inputWithBias = 1.0 :: input
-    val resultsFromHiddenLayer = hiddenLayer map { x => x.apply(inputWithBias) }
-    println("Results from HiddenLayer")
-    println(resultsFromHiddenLayer)
-    val resultHiddenWithBias = 1.0 :: resultsFromHiddenLayer
-    outputLayer map { x => x.apply(resultHiddenWithBias)}
-  } 
+    sigmoidList(resultsOutputLayer(input))
+  }
   
+  /**
+   * z2
+   */
+  def resultsHiddenLayer(input:Input):Result = {
+    val inputWithBias = 1.0 :: input
+    hiddenLayer map { x => x.apply(inputWithBias) }
+  }
+  
+  /**
+   * Sigmoid(z2)
+   */
+  def resultsHiddenLayerSigmoided(input:Input): Result = sigmoidList(resultsHiddenLayer(input))
+  
+  /**
+   * z3
+   */
+  def resultsOutputLayer(input:Input): Result = {
+    val resultHiddenWithBias = 1.0 :: resultsHiddenLayerSigmoided(input)
+    outputLayer map { x => x.apply(resultHiddenWithBias)}
+  }
+  
+  def sigmoidList(input: List[Double]): List[Double] = input map { x => sigmoid(x)}
   
 }
