@@ -2,12 +2,47 @@ package recog
 
 object Main extends App {
   
-  val theta1 = List(0,1.0,2.0,3.0)
-  val theta2 = List(0,2.0)
   
-  val input = List(8.0,9.0,10.0)
+  println("Loading examples...")
   
-  val network = NeuralNetwork(input.length,List(Neuron(theta1)), List(Neuron(theta2)))
-  println("Final  "+network.apply(input))
+  val trainingPatterns = ImageNumberReader.patterns
+  
+  println("Examples loaded...")
+  
+  println("Creating neural network...")
+  
+  val hiddenLayerSize = 20
+  val outputLayerSize = 10
+  
+  val network = NeuralNetwork(64, List.fill(hiddenLayerSize)(Neuron(Nil)), List.fill(outputLayerSize)(Neuron(Nil)))
+  
+  val trainer = Trainer(network)
+  
+  val trainingExamples = trainingPatterns flatMap {
+    case (number, images) => images map {
+      img => (img, number)
+    }
+  }
+  
+  //we have to convert the number to a List of 0's where the position is 1 Ex 1-> (0,1,0,0...) 2-> (0,0,1,0...)
+  
+  val trainingExamplesFormmated = trainingExamples map { case (img, number) => {
+    val empty = List.fill(10)(0.0)
+    (img, empty updated(number, 1.0))
+  } }
+  
+  val trainedNetwork = trainer.train(trainingExamplesFormmated, 1)
+  
+  //Once we have the trainedNetwork, test how can fit the trainingSet
+  val examplesCorrect = trainingExamplesFormmated map {
+    case (input, expectedRes) => {
+      val res = trainedNetwork.apply(input)
+      if(res.indexOf(res.max) == expectedRes.indexOf(expectedRes.max)) 1.0 else 0.0
+    }
+  }
+  
+  val percentage = (examplesCorrect.sum/examplesCorrect.length)*100
+  println("% correct: "+percentage)
+  
   
 }

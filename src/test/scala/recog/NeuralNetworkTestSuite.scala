@@ -94,16 +94,16 @@ class NeuralNetworkTestSuite extends FunSuite{
   
   test("Epsilon init for Hidden for 25-10 with 400 inputs neural network") {
     
-    val hiddenLayer = List.fill(25)(Neuron(Nil))
-    val outputLayer = List.fill(10)(Neuron(Nil))
+    val hiddenLayer = List.fill(25)(Neuron(List.fill(401)(0.0)))
+    val outputLayer = List.fill(10)(Neuron(List.fill(26)(0.0)))
     val epsilon = Trainer(NeuralNetwork(400, hiddenLayer, outputLayer)).epsilonInitForHidden
     assert(epsilon > 0.11 && epsilon < 0.13)
   }
   
   test("Epsilon init for Output for 25-10 with 400 inputs neural network") {
     
-    val hiddenLayer = List.fill(25)(Neuron(Nil))
-    val outputLayer = List.fill(10)(Neuron(Nil))
+    val hiddenLayer = List.fill(25)(Neuron(List.fill(401)(0.0)))
+    val outputLayer = List.fill(10)(Neuron(List.fill(26)(0.0)))
     val epsilon = Trainer(NeuralNetwork(400, hiddenLayer, outputLayer)).epsilonInitForOutput
     assert(epsilon > 0.40 && epsilon < 0.42)
   }

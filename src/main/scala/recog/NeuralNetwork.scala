@@ -23,9 +23,12 @@ case class NeuralNetwork(
     hiddenLayer: List[Neuron],
     outputLayer: List[Neuron]) {
   
+  require(inputLayer > 0)
+  require(hiddenLayer.foldLeft(true)((actual,neuron)=> actual && neuron.theta.length == inputLayer + 1))
+  require(outputLayer.foldLeft(true)((actual,neuron)=> actual && neuron.theta.length == hiddenLayer.length + 1))
   
   /**
-   * Sigmoid(z3)
+   * a3 = Sigmoid(z3)
    */
   def apply(input: Input): Result = {
     sigmoidList(resultsOutputLayer(input))
@@ -40,7 +43,7 @@ case class NeuralNetwork(
   }
   
   /**
-   * Sigmoid(z2)
+   * a2 = Sigmoid(z2)
    */
   def resultsHiddenLayerSigmoided(input:Input): Result = sigmoidList(resultsHiddenLayer(input))
   

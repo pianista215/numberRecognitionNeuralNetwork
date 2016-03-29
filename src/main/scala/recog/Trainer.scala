@@ -57,10 +57,65 @@ case class Trainer(network : NeuralNetwork) {
   def initThetaForOutput : List[Double] = 
     List.fill(network.hiddenLayer.length+1)(-epsilonInitForOutput + (2*epsilonInitForOutput)* Random.nextDouble())
     
+  /**
+   * Return the trained neural network
+   */
+  def train(trainingSet: TrainingSet, lambda: Double): NeuralNetwork  = {
+    //Start with random thetas
+    val hiddenLayer = (1 to network.hiddenLayer.length) map { x=> Neuron(initThetaForHidden) } toList
+    val outputLayer = (1 to network.outputLayer.length) map { x=> Neuron(initThetaForOutput) } toList
+
+    val initialNetwork = NeuralNetwork(network.inputLayer, hiddenLayer, outputLayer)
     
+    def trainHelper(trainingSet: TrainingSet, currNetwork: NeuralNetwork): NeuralNetwork = {
+      if(trainingSet.isEmpty) currNetwork
+      else {
+        val example = trainingSet.head
+        //TODO: Modify theta
+        val newNetwork = NeuralNetwork(currNetwork.inputLayer, currNetwork.hiddenLayer, currNetwork.outputLayer)
+        trainHelper(trainingSet.tail, newNetwork)
+      }
+    }
+    
+    trainHelper(trainingSet, initialNetwork)
+  }
+  
+  
+    
+  /**
+   * Calculate dessuf3 of the current training example
+   * Dessuf3 should be a vector with the size of the output layer
+   * Each neuron of the layer should be mapped to one dessuf3 (dessuf3_k)
+   */
   def dessuf3(trainingExample: Input, expectedResult: Result): List[Double] = {
     val result = network.apply(trainingExample)
     val zipped = result zip expectedResult
-    zipped map { case (res,exp) => res - exp }
+    val dessuf3 = zipped map { case (res,exp) => res - exp }
+    assert(dessuf3.length == network.outputLayer.length)
+    dessuf3
   }
+  
+  /**
+   * Calculate dessuf2 of the current training example
+   * Dessuf3 should be a vector with the size of the hidden layer
+   * Each neuron of the layer should be mapped to one dessuf2 (dessuf2_k)
+   */
+  def dessuf2(trainingExample: Input, expectedResult: Result): List[Double] = {
+    val d3 = dessuf3(trainingExample,expectedResult)
+    val z2 = network.resultsHiddenLayer(trainingExample)
+    val g_pri_z2 = z2 map {x=> sigmoidGradient(x)}
+    val matrix = network.outputLayer map {neuron => neuron.theta} 
+    val inverted = matrix.transpose
+    val preProduct = inverted map {row => row zip d3}
+    val product = preProduct map {row =>  row map { case (a,b) => a*b}}
+    val resultProduct = product map { row => row.sum}
+    
+    val dessuf2Pre = resultProduct zip g_pri_z2
+    val dessuf2 = dessuf2Pre map { case (a,b) => a*b}
+    
+    assert(dessuf2.length == network.hiddenLayer.length)
+    
+    dessuf2
+  }
+    
 }
