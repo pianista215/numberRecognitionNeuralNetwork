@@ -1,6 +1,7 @@
 # Eclipse
 .classpath
-.project
+.project/*
+!.project/plugins.sbt
 .settings/
 bin/
 .cache-*
