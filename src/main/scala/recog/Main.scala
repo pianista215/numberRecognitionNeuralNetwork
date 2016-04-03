@@ -45,5 +45,5 @@ object Main extends App {
   val percentage = (examplesCorrect.sum/examplesCorrect.length)*100
   println("% correct: "+percentage)
   
-  
+  println(trainer.gradient(trainingExamplesFormmated))
 }

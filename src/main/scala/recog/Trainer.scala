@@ -103,23 +103,63 @@ case class Trainer(network : NeuralNetwork) {
    */
   def dessuf2(trainingExample: Input, expectedResult: Result): List[Double] = {
     
-    //Theta(Ouputlayer) * d3 .* g'(z2)
+    //Theta_2(Ouputlayer) * d3 .* g'(z2)
     
+    //Theta2*d3
     val d3 = dessuf3(trainingExample,expectedResult)
-    val z2 = network.resultsHiddenLayer(trainingExample)
-    val g_pri_z2 = z2 map {x=> sigmoidGradient(x)}
-    val matrix = network.outputLayer map {neuron => neuron.theta} 
-    val inverted = matrix.transpose
-    val preProduct = inverted map {row => row zip d3}
+    val theta2 = network.outputLayer map {neuron => neuron.theta}
+    val theta2_inverted = theta2.transpose
+    val preProduct = theta2_inverted map {row => row zip d3}
     val product = preProduct map {row =>  row map { case (a,b) => a*b}}
     val resultProduct = product map { row => row.sum}
     
+    
+    
+    //Theta2*d3.* g'(z2)
+    val z2 = network.resultsHiddenLayer(trainingExample)
+    val g_pri_z2 = List(1.0) ::: z2 map {x=> sigmoidGradient(x)}
     val dessuf2Pre = resultProduct zip g_pri_z2
     val dessuf2 = dessuf2Pre map { case (a,b) => a*b}
     
-    assert(dessuf2.length == network.hiddenLayer.length)
+    assert(dessuf2.length == network.hiddenLayer.length + 1)
     
     dessuf2
+  }
+  
+  /**
+   * Return the gradient of the NeuralNetwork trained (Theta1_grad(:) ; Theta2_grad(:))
+   * Where Theta1 are the gradient of all the thetas of the neurons from the Hidden Layer and Theta2_grad the same for the output layer
+   */
+  def gradient(trainingSet: TrainingSet): List[Double] = {
+    val intermediateGradients = trainingSet map {
+      case(trainingExample,expectedResult) => {
+        val d3 = dessuf3(trainingExample, expectedResult)
+        val d2 = dessuf2(trainingExample, expectedResult)
+        val a2 = List(1.0):::network.resultsHiddenLayerSigmoided(trainingExample)
+        
+        val theta2_grad = for {
+          d3_k <- d3
+          a2_k <- a2
+        } yield d3_k*a2_k
+        
+        val d2_withoutHead = d2.tail
+        
+        val theta1_grad = for {
+          d2_k <- d2_withoutHead
+          x <- trainingExample
+        } yield d2_k*x
+        
+        (theta1_grad,theta2_grad)
+      }
+    }
+    
+    val incrementsTheta1_grad = intermediateGradients map {x => x._1}
+    val incrementsTheta2_grad = intermediateGradients map {x => x._2}
+    
+    val finalTheta1_grad = incrementsTheta1_grad map {x => x.sum / trainingSet.length}
+    val finalTheta2_grad = incrementsTheta2_grad map {x => x.sum / trainingSet.length}
+    
+    finalTheta1_grad:::finalTheta2_grad //TODO: Regularization
   }
     
 }
