@@ -146,8 +146,11 @@ case class Trainer(network : NeuralNetwork) {
         
         val theta1_grad = for {
           d2_k <- d2_withoutHead
-          x <- trainingExample
+          x <- 1.0 :: trainingExample
         } yield d2_k*x
+        
+        assert(theta2_grad.length == network.outputLayer.length*(network.hiddenLayer.length+1))
+        assert(theta1_grad.length == network.hiddenLayer.length*(network.inputLayer+1))
         
         (theta1_grad,theta2_grad)
       }
@@ -156,10 +159,13 @@ case class Trainer(network : NeuralNetwork) {
     val incrementsTheta1_grad = intermediateGradients map {x => x._1}
     val incrementsTheta2_grad = intermediateGradients map {x => x._2}
     
-    val finalTheta1_grad = incrementsTheta1_grad map {x => x.sum / trainingSet.length}
-    val finalTheta2_grad = incrementsTheta2_grad map {x => x.sum / trainingSet.length}
+    val finalTheta1_grad = incrementsTheta1_grad.transpose map {x => x.sum / trainingSet.length}
+    val finalTheta2_grad = incrementsTheta2_grad.transpose map {x => x.sum / trainingSet.length}
     
-    finalTheta1_grad:::finalTheta2_grad //TODO: Regularization
+    val grad = finalTheta1_grad:::finalTheta2_grad //TODO: Regularization
+    assert(grad.length == (network.inputLayer+1)*network.hiddenLayer.length + 
+                        (network.hiddenLayer.length+1)*network.outputLayer.length)
+    grad
   }
     
 }

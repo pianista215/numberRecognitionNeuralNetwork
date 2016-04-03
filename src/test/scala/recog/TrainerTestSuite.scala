@@ -95,5 +95,27 @@ class TrainerTestSuite extends FunSuite{
     
   }
   
+  test("Gradient test") {
+    val theta11 = List(0.0, 1.0, 1.0)
+    val theta12 = List(0.0, 1.0, 2.0)
+    val neuron11 = Neuron(theta11)
+    val neuron12 = Neuron(theta12)
+    val theta21 = List(0.0, 1.0, 0.5)
+    val theta22 = List(0.0, 1.0, 2.0)
+    val neuron21 = Neuron(theta21)
+    val neuron22 = Neuron(theta22)
+    val lambda = 0
+    
+    val network = NeuralNetwork(2, List(neuron11,neuron12), List(neuron21, neuron22))
+    
+    val inputTraining1 = List(2.0, 6.0)
+    val expectedTraining1 = List(1.0, 0.0)
+    val trainingSet = List( (inputTraining1,expectedTraining1) )
+    val trainer = Trainer(network)
+    
+    assert(trainer.gradient(trainingSet).length === (network.inputLayer+1)*network.hiddenLayer.length + 
+                        (network.hiddenLayer.length+1)*network.outputLayer.length)
+  }
+  
   
 }
