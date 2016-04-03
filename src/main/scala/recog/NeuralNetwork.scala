@@ -23,6 +23,12 @@ case class NeuralNetwork(
     hiddenLayer: List[Neuron],
     outputLayer: List[Neuron]) {
   
+  
+  def this(inputLayer: Int, hiddenLayerCount: Int, outputLayerCount: Int) = 
+    this(inputLayer, 
+        List.fill(hiddenLayerCount)(new Neuron(inputLayer+1)), 
+        List.fill(outputLayerCount)(new Neuron(hiddenLayerCount+1)))
+  
   require(inputLayer > 0)
   require(hiddenLayer.foldLeft(true)((actual,neuron)=> actual && neuron.theta.length == inputLayer + 1))
   require(outputLayer.foldLeft(true)((actual,neuron)=> actual && neuron.theta.length == hiddenLayer.length + 1))

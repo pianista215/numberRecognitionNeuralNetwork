@@ -13,8 +13,9 @@ object Main extends App {
   
   val hiddenLayerSize = 20
   val outputLayerSize = 10
+  val inputs = 64 //8x8 pixels
   
-  val network = NeuralNetwork(64, List.fill(hiddenLayerSize)(Neuron(Nil)), List.fill(outputLayerSize)(Neuron(Nil)))
+  val network = new NeuralNetwork(inputs, hiddenLayerSize, outputLayerSize)
   
   val trainer = Trainer(network)
   

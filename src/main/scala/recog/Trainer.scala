@@ -84,10 +84,11 @@ case class Trainer(network : NeuralNetwork) {
     
   /**
    * Calculate dessuf3 of the current training example
-   * Dessuf3 should be a vector with the size of the output layer
+   * Dessuf3 should be a List with the size of the output layer
    * Each neuron of the layer should be mapped to one dessuf3 (dessuf3_k)
    */
   def dessuf3(trainingExample: Input, expectedResult: Result): List[Double] = {
+    //d3 = resultFromTheNeuronNetwork - expected
     val result = network.apply(trainingExample)
     val zipped = result zip expectedResult
     val dessuf3 = zipped map { case (res,exp) => res - exp }
@@ -101,6 +102,9 @@ case class Trainer(network : NeuralNetwork) {
    * Each neuron of the layer should be mapped to one dessuf2 (dessuf2_k)
    */
   def dessuf2(trainingExample: Input, expectedResult: Result): List[Double] = {
+    
+    //Theta(Ouputlayer) * d3 .* g'(z2)
+    
     val d3 = dessuf3(trainingExample,expectedResult)
     val z2 = network.resultsHiddenLayer(trainingExample)
     val g_pri_z2 = z2 map {x=> sigmoidGradient(x)}

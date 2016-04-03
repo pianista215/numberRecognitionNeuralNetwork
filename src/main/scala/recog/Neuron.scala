@@ -5,6 +5,12 @@ package recog
  * @author Pianista
  */
 case class Neuron(theta: List[Double]) {
+  
+  /**
+   * Alternative constructor
+   */
+  def this(numInputs: Int) =
+    this(List.fill(numInputs)(0.0))
 
   /**
    * Theta must be of the same length as the input.
