@@ -63,4 +63,37 @@ case class NeuralNetwork(
   
   def sigmoidList(input: List[Double]): List[Double] = input map { x => sigmoid(x)}
   
+  /**
+   * Retrieve the list of thetas from hiddenLayer & outputLayer (theta1; theta2)
+   */
+  def thetas: List[Double] = {
+    val hidTheta = hiddenLayer flatMap {x => x.theta}
+    val outputTheta = outputLayer flatMap {x => x.theta}
+    hidTheta:::outputTheta
+  }
+  
+  def updateThetasWithGradient(grad: List[Double], alpha: Double): NeuralNetwork = {
+    val inputSize = inputLayer + 1 //bias
+    val hiddenLayerSize = hiddenLayer.length
+    
+    val theta1 = hiddenLayer flatMap {x => x.theta}
+    val theta2 = outputLayer flatMap {x => x.theta}
+    
+    
+    
+    val grad_theta1 = grad take inputSize*hiddenLayerSize
+    val new_theta1 = (theta1 zip grad_theta1) map { case(x,y) => x-alpha*y} 
+    val newHiddenLayer = new_theta1.grouped(inputSize) map {x => Neuron(x)} toList
+    
+    println("Theta1:"+theta1)
+    println("////")
+    println("New theta1:"+new_theta1)
+    
+    val grad_theta2 = grad drop inputSize*hiddenLayerSize
+    val new_theta2 = (theta2 zip grad_theta2) map { case(x,y) => x-alpha*y}
+    val newOutputLayer = new_theta2.grouped(hiddenLayerSize+1) map {x => Neuron(x)} toList
+    
+    NeuralNetwork(inputLayer, newHiddenLayer, newOutputLayer)
+    
+  }
 }

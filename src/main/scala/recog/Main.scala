@@ -45,5 +45,6 @@ object Main extends App {
   val percentage = (examplesCorrect.sum/examplesCorrect.length)*100
   println("% correct: "+percentage)
   
-  println(trainer.gradient(trainingExamplesFormmated))
+  println("Theta1 finish: " + trainedNetwork.hiddenLayer.map {x => x.theta})
+  
 }

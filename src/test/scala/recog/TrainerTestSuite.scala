@@ -25,7 +25,7 @@ class TrainerTestSuite extends FunSuite{
     val trainingSet = List( (inputTraining1,expectedTraining1) )
     val trainer = Trainer(network)
     
-    assert(trainer.costFunction(trainingSet, lambda) > 3.245 && trainer.costFunction(trainingSet, lambda) < 3.250)
+    assert(trainer.costFunction(network,trainingSet, lambda) > 3.245 && trainer.costFunction(network,trainingSet, lambda) < 3.250)
   }
   
   test("Sigmoid gradient") {
@@ -89,7 +89,11 @@ class TrainerTestSuite extends FunSuite{
     val d3 = List(-0.18247560743822533, 0.9525588993699814)
     
     val d3_x_theta2 = List(0.0, d3(0)+d3(1), 0.5*d3(0) + 2.0*d3(1))
-    val a2 = List(1.0) ::: (network.resultsHiddenLayer(inputTraining1) map {x => sigmoidGradient(x)})
+    
+    val a2 = List(1.0) ::: (network.resultsHiddenLayer(inputTraining1) map {x => sigmoidGradient(x)}) //TODO:Esto esta bien??
+    
+    println("A2"+a2)
+    println("Hidd:"+network.resultsHiddenLayer(inputTraining1))
     
     assert(d2 === List(d3_x_theta2(0)*a2(0), d3_x_theta2(1)*a2(1), d3_x_theta2(2)*a2(2)))
     
@@ -113,7 +117,7 @@ class TrainerTestSuite extends FunSuite{
     val trainingSet = List( (inputTraining1,expectedTraining1) )
     val trainer = Trainer(network)
     
-    assert(trainer.gradient(trainingSet).length === (network.inputLayer+1)*network.hiddenLayer.length + 
+    assert(trainer.gradient(network,trainingSet).length === (network.inputLayer+1)*network.hiddenLayer.length + 
                         (network.hiddenLayer.length+1)*network.outputLayer.length)
   }
   

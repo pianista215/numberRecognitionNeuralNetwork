@@ -6,7 +6,7 @@ import scala.util.Random
  * In charge of train the Neural Network selecting initial values for theta
  * @author Pianista
  */
-case class Trainer(network : NeuralNetwork) {
+case class Trainer(network : NeuralNetwork) { //TODO: Remove network
   
   
   /**
@@ -15,12 +15,11 @@ case class Trainer(network : NeuralNetwork) {
    * (0,1,0,0...) for detect a 1 etc
    * 
    */
-  def costFunction(trainingSet: TrainingSet, lambda: Double):Double = {
+  def costFunction(network: NeuralNetwork, trainingSet: TrainingSet, lambda: Double):Double = {
     val costPerExample = trainingSet map {
       case (input,expected) => {
         val calculated = network.apply(input)
         val calcAndExp = calculated zip expected
-        println("CalcAndExp "+calcAndExp)
         val diff = calcAndExp map {
           case(calc,exp) => Math.abs(-exp * Math.log(calc) - (1 - exp)*Math.log(1 - calc) )
         }
@@ -66,21 +65,44 @@ case class Trainer(network : NeuralNetwork) {
     val outputLayer = (1 to network.outputLayer.length) map { x=> Neuron(initThetaForOutput) } toList
 
     val initialNetwork = NeuralNetwork(network.inputLayer, hiddenLayer, outputLayer)
+    val maxIter = 1
+    val lambda = 1.0
     
-    def trainHelper(trainingSet: TrainingSet, currNetwork: NeuralNetwork): NeuralNetwork = {
-      if(trainingSet.isEmpty) currNetwork
-      else {
-        val example = trainingSet.head
-        //TODO: Modify theta
-        val newNetwork = NeuralNetwork(currNetwork.inputLayer, currNetwork.hiddenLayer, currNetwork.outputLayer)
-        trainHelper(trainingSet.tail, newNetwork)
-      }
-    }
     
-    trainHelper(trainingSet, initialNetwork)
+    customFmin(initialNetwork, trainingSet, maxIter)
+
   }
   
   
+  /**
+   * Custom Fmin for get the best theta values (Don't use in your projects. Just for educational purpose)
+   */
+  def customFmin(network: NeuralNetwork, training: TrainingSet, maxIter: Int) : NeuralNetwork = {
+    
+    def newNetworkFromGradient(step:Double): NeuralNetwork = {
+      val currCost = costFunction(network, training, 1.0)
+      println("Current cost: "+currCost) //TODO: Lambda
+      
+      val grad = gradient(network, training)
+      
+      //Modify theta
+      val newNetwork = network.updateThetasWithGradient(grad, step)
+      val newCost = costFunction(newNetwork, training, 1.0)
+      
+      if(newCost > currCost) newNetworkFromGradient(step/2) //step too big 
+      else {
+        println("New cost: "+newCost) //TODO: Lambda
+        newNetwork
+      }
+      
+    }
+    
+    //TODO: More iterations
+    println("Iter:"+maxIter)
+    if(maxIter==0)network
+    else customFmin(newNetworkFromGradient(0.0055), training, maxIter-1)
+      
+  }
     
   /**
    * Calculate dessuf3 of the current training example
@@ -130,7 +152,7 @@ case class Trainer(network : NeuralNetwork) {
    * Return the gradient of the NeuralNetwork trained (Theta1_grad(:) ; Theta2_grad(:))
    * Where Theta1 are the gradient of all the thetas of the neurons from the Hidden Layer and Theta2_grad the same for the output layer
    */
-  def gradient(trainingSet: TrainingSet): List[Double] = {
+  def gradient(network: NeuralNetwork, trainingSet: TrainingSet): List[Double] = {
     val intermediateGradients = trainingSet map {
       case(trainingExample,expectedResult) => {
         val d3 = dessuf3(trainingExample, expectedResult)
@@ -143,6 +165,8 @@ case class Trainer(network : NeuralNetwork) {
         } yield d3_k*a2_k
         
         val d2_withoutHead = d2.tail
+        
+        println("D2"+d2)
         
         val theta1_grad = for {
           d2_k <- d2_withoutHead
@@ -159,13 +183,14 @@ case class Trainer(network : NeuralNetwork) {
     val incrementsTheta1_grad = intermediateGradients map {x => x._1}
     val incrementsTheta2_grad = intermediateGradients map {x => x._2}
     
+    
     val finalTheta1_grad = incrementsTheta1_grad.transpose map {x => x.sum / trainingSet.length}
     val finalTheta2_grad = incrementsTheta2_grad.transpose map {x => x.sum / trainingSet.length}
     
     val grad = finalTheta1_grad:::finalTheta2_grad //TODO: Regularization
     assert(grad.length == (network.inputLayer+1)*network.hiddenLayer.length + 
                         (network.hiddenLayer.length+1)*network.outputLayer.length)
-    grad
+    grad //TODO: Repasar el gradiente esta mal, devuelve 0 para todas las derivadas de la primera capa
   }
     
 }
