@@ -85,9 +85,9 @@ case class NeuralNetwork(
     val new_theta1 = (theta1 zip grad_theta1) map { case(x,y) => x-alpha*y} 
     val newHiddenLayer = new_theta1.grouped(inputSize) map {x => Neuron(x)} toList
     
-    println("Theta1:"+theta1)
+    /*println("Theta1:"+theta1)
     println("////")
-    println("New theta1:"+new_theta1)
+    println("New theta1:"+new_theta1)*/
     
     val grad_theta2 = grad drop inputSize*hiddenLayerSize
     val new_theta2 = (theta2 zip grad_theta2) map { case(x,y) => x-alpha*y}

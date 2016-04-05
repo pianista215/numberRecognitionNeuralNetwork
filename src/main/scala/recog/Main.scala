@@ -17,7 +17,7 @@ object Main extends App {
   
   val network = new NeuralNetwork(inputs, hiddenLayerSize, outputLayerSize)
   
-  val trainer = Trainer(network)
+  val trainer = Trainer()
   
   val trainingExamples = trainingPatterns flatMap {
     case (number, images) => images map {
@@ -32,7 +32,7 @@ object Main extends App {
     (img, empty updated(number, 1.0))
   } }
   
-  val trainedNetwork = trainer.train(trainingExamplesFormmated, 1)
+  val trainedNetwork = trainer.train(network, trainingExamplesFormmated, 1)
   
   //Once we have the trainedNetwork, test how can fit the trainingSet
   val examplesCorrect = trainingExamplesFormmated map {

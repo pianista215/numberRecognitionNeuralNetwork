@@ -23,7 +23,7 @@ class TrainerTestSuite extends FunSuite{
     val expectedTraining1 = List(1.0, 0.0)
     
     val trainingSet = List( (inputTraining1,expectedTraining1) )
-    val trainer = Trainer(network)
+    val trainer = Trainer()
     
     assert(trainer.costFunction(network,trainingSet, lambda) > 3.245 && trainer.costFunction(network,trainingSet, lambda) < 3.250)
   }
@@ -33,12 +33,12 @@ class TrainerTestSuite extends FunSuite{
   }
   
   test("Epsilon init for Hidden for 25-10 with 400 inputs neural network") {
-    val epsilon = Trainer(new NeuralNetwork(400, 25, 10)).epsilonInitForHidden
+    val epsilon = Trainer().epsilonInitForHidden(new NeuralNetwork(400, 25, 10))
     assert(epsilon > 0.11 && epsilon < 0.13)
   }
   
   test("Epsilon init for Output for 25-10 with 400 inputs neural network") {   
-    val epsilon = Trainer(new NeuralNetwork(400, 25, 10)).epsilonInitForOutput
+    val epsilon = Trainer().epsilonInitForOutput(new NeuralNetwork(400, 25, 10))
     assert(epsilon > 0.40 && epsilon < 0.42)
   }
   
@@ -57,11 +57,11 @@ class TrainerTestSuite extends FunSuite{
     
     val inputTraining1 = List(2.0, 6.0)
     val expectedTraining1 = List(1.0, 0.0)
-    val trainer = Trainer(network)
+    val trainer = Trainer()
     
     val output = network.apply(inputTraining1)
-    print(trainer.dessuf3(inputTraining1, expectedTraining1))
-    assert(trainer.dessuf3(inputTraining1, expectedTraining1) === List(output(0) - 1.0, output(1) - 0.0))
+    print(trainer.dessuf3(network, inputTraining1, expectedTraining1))
+    assert(trainer.dessuf3(network, inputTraining1, expectedTraining1) === List(output(0) - 1.0, output(1) - 0.0))
     
     //List(-0.18247560743822533, 0.9525588993699814)
   }
@@ -82,9 +82,9 @@ class TrainerTestSuite extends FunSuite{
     
     val inputTraining1 = List(2.0, 6.0)
     val expectedTraining1 = List(1.0, 0.0)
-    val trainer = Trainer(network)
+    val trainer = Trainer()
     
-    val d2 = trainer.dessuf2(inputTraining1, expectedTraining1)
+    val d2 = trainer.dessuf2(network, inputTraining1, expectedTraining1)
     
     val d3 = List(-0.18247560743822533, 0.9525588993699814)
     
@@ -115,7 +115,7 @@ class TrainerTestSuite extends FunSuite{
     val inputTraining1 = List(2.0, 6.0)
     val expectedTraining1 = List(1.0, 0.0)
     val trainingSet = List( (inputTraining1,expectedTraining1) )
-    val trainer = Trainer(network)
+    val trainer = Trainer()
     
     assert(trainer.gradient(network,trainingSet).length === (network.inputLayer+1)*network.hiddenLayer.length + 
                         (network.hiddenLayer.length+1)*network.outputLayer.length)

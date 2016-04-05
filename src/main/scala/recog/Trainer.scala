@@ -6,8 +6,7 @@ import scala.util.Random
  * In charge of train the Neural Network selecting initial values for theta
  * @author Pianista
  */
-case class Trainer(network : NeuralNetwork) { //TODO: Remove network
-  
+case class Trainer() {
   
   /**
    * Calculate the cost of the current neural network for a training set given with the expected results
@@ -37,35 +36,37 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
   /**
    * From Stanford Coursera Machine Learning Course. Recommendation
    */
-  def epsilonInitForHidden: Double = Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.inputLayer)
+  def epsilonInitForHidden(network:NeuralNetwork): Double = 
+    Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.inputLayer)
   
    /**
    * From Stanford Coursera Machine Learning Course. Recommendation
    */
-  def epsilonInitForOutput: Double = Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.outputLayer.length)
+  def epsilonInitForOutput(network:NeuralNetwork): Double = 
+    Math.sqrt(6) / Math.sqrt(network.hiddenLayer.length + network.outputLayer.length)
   
   /**
    * Generate a random theta for a neuron in the Hidden layer
    */
-  def initThetaForHidden: List[Double] = 
-    List.fill(network.inputLayer+1)(-epsilonInitForHidden + (2*epsilonInitForHidden)* Random.nextDouble())
+  def initThetaForHidden(network:NeuralNetwork): List[Double] = 
+    List.fill(network.inputLayer+1)(-epsilonInitForHidden(network) + (2*epsilonInitForHidden(network))* Random.nextDouble())
  
   /**
    * Generate a random theta for a neuron in the Output layer
    */
-  def initThetaForOutput : List[Double] = 
-    List.fill(network.hiddenLayer.length+1)(-epsilonInitForOutput + (2*epsilonInitForOutput)* Random.nextDouble())
+  def initThetaForOutput (network:NeuralNetwork) : List[Double] = 
+    List.fill(network.hiddenLayer.length+1)(-epsilonInitForOutput(network) + (2*epsilonInitForOutput(network))* Random.nextDouble())
     
   /**
    * Return the trained neural network
    */
-  def train(trainingSet: TrainingSet, lambda: Double): NeuralNetwork  = {
+  def train(network:NeuralNetwork, trainingSet: TrainingSet, lambda: Double): NeuralNetwork  = {
     //Start with random thetas
-    val hiddenLayer = (1 to network.hiddenLayer.length) map { x=> Neuron(initThetaForHidden) } toList
-    val outputLayer = (1 to network.outputLayer.length) map { x=> Neuron(initThetaForOutput) } toList
+    val hiddenLayer = (1 to network.hiddenLayer.length) map { x=> Neuron(initThetaForHidden(network)) } toList
+    val outputLayer = (1 to network.outputLayer.length) map { x=> Neuron(initThetaForOutput(network)) } toList
 
     val initialNetwork = NeuralNetwork(network.inputLayer, hiddenLayer, outputLayer)
-    val maxIter = 1
+    val maxIter = 400
     val lambda = 1.0
     
     
@@ -100,7 +101,7 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
     //TODO: More iterations
     println("Iter:"+maxIter)
     if(maxIter==0)network
-    else customFmin(newNetworkFromGradient(0.0055), training, maxIter-1)
+    else customFmin(newNetworkFromGradient(0.15), training, maxIter-1)
       
   }
     
@@ -109,7 +110,7 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
    * Dessuf3 should be a List with the size of the output layer
    * Each neuron of the layer should be mapped to one dessuf3 (dessuf3_k)
    */
-  def dessuf3(trainingExample: Input, expectedResult: Result): List[Double] = {
+  def dessuf3(network:NeuralNetwork, trainingExample: Input, expectedResult: Result): List[Double] = {
     //d3 = resultFromTheNeuronNetwork - expected
     val result = network.apply(trainingExample)
     val zipped = result zip expectedResult
@@ -123,12 +124,12 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
    * Dessuf3 should be a vector with the size of the hidden layer
    * Each neuron of the layer should be mapped to one dessuf2 (dessuf2_k)
    */
-  def dessuf2(trainingExample: Input, expectedResult: Result): List[Double] = {
+  def dessuf2(network:NeuralNetwork, trainingExample: Input, expectedResult: Result): List[Double] = {
     
     //Theta_2(Ouputlayer) * d3 .* g'(z2)
     
     //Theta2*d3
-    val d3 = dessuf3(trainingExample,expectedResult)
+    val d3 = dessuf3(network, trainingExample,expectedResult)
     val theta2 = network.outputLayer map {neuron => neuron.theta}
     val theta2_inverted = theta2.transpose
     val preProduct = theta2_inverted map {row => row zip d3}
@@ -155,8 +156,8 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
   def gradient(network: NeuralNetwork, trainingSet: TrainingSet): List[Double] = {
     val intermediateGradients = trainingSet map {
       case(trainingExample,expectedResult) => {
-        val d3 = dessuf3(trainingExample, expectedResult)
-        val d2 = dessuf2(trainingExample, expectedResult)
+        val d3 = dessuf3(network, trainingExample, expectedResult)
+        val d2 = dessuf2(network, trainingExample, expectedResult)
         val a2 = List(1.0):::network.resultsHiddenLayerSigmoided(trainingExample)
         
         val theta2_grad = for {
@@ -165,8 +166,6 @@ case class Trainer(network : NeuralNetwork) { //TODO: Remove network
         } yield d3_k*a2_k
         
         val d2_withoutHead = d2.tail
-        
-        println("D2"+d2)
         
         val theta1_grad = for {
           d2_k <- d2_withoutHead
