@@ -1,5 +1,15 @@
 package recog
-
+/**
+ * @author Unai Sarasola
+ * 
+ * In this program we are going to train a Neural Network in order to identify the numbers in a image PNG of 8x8 pixels
+ * After that we will try out trained Network with a test.png image to see how the network is able to identify the number on it
+ * 
+ * You can play with the lambda, step, and number of iterations changing Trainer() with Trainer(iter, lambda, step) to obtain different networks
+ * 
+ * If you use that an approach like that into a production environment, you should change my fmincg function, by a better solution from a Common library
+ * 
+ */
 object Main extends App {
   
   
@@ -32,7 +42,7 @@ object Main extends App {
     (img, empty updated(number, 1.0))
   } }
   
-  val trainedNetwork = trainer.train(network, trainingExamplesFormmated, 1)
+  val trainedNetwork = trainer.train(network, trainingExamplesFormmated)
   
   //Once we have the trainedNetwork, test how can fit the trainingSet
   val examplesCorrect = trainingExamplesFormmated map {
@@ -45,6 +55,10 @@ object Main extends App {
   val percentage = (examplesCorrect.sum/examplesCorrect.length)*100
   println("% correct: "+percentage)
   
-  println("Theta1 finish: " + trainedNetwork.hiddenLayer.map {x => x.theta})
+  
+  //Try to identify the target image
+  val test = ImageNumberReader.loadImage("test.png")
+  val result = trainedNetwork.apply(test)
+  println("Test image identified as number: "+ result.indexOf(result.max))
   
 }

@@ -16,7 +16,7 @@ package recog
  *  
  * (But you can use more layers/change the layer sizes if the problem is not well fit)
  *  
- * @author Pianista
+ * @author Unai Sarasola
  */
 case class NeuralNetwork(
     inputLayer: Int, //Number of inputs of the neural Network (also called input neurons /input units)
@@ -84,10 +84,6 @@ case class NeuralNetwork(
     val grad_theta1 = grad take inputSize*hiddenLayerSize
     val new_theta1 = (theta1 zip grad_theta1) map { case(x,y) => x-alpha*y} 
     val newHiddenLayer = new_theta1.grouped(inputSize) map {x => Neuron(x)} toList
-    
-    /*println("Theta1:"+theta1)
-    println("////")
-    println("New theta1:"+new_theta1)*/
     
     val grad_theta2 = grad drop inputSize*hiddenLayerSize
     val new_theta2 = (theta2 zip grad_theta2) map { case(x,y) => x-alpha*y}

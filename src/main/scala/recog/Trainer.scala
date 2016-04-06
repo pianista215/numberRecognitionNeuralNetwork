@@ -3,10 +3,22 @@ package recog
 import scala.util.Random
 
 /**
- * In charge of train the Neural Network selecting initial values for theta
- * @author Pianista
+ * Overload object compation for constructor
  */
-case class Trainer() {
+
+object Trainer {
+  def apply() = new Trainer()
+}
+
+/**
+ * In charge of train the Neural Network selecting initial values for theta
+ * @author Unai Sarasola
+ */
+case class Trainer(maxIter: Int, lambda: Double, step: Double) {
+  
+  def this() = {
+    this(400, 1.0, 0.15) //Default values
+  }
   
   /**
    * Calculate the cost of the current neural network for a training set given with the expected results
@@ -60,15 +72,12 @@ case class Trainer() {
   /**
    * Return the trained neural network
    */
-  def train(network:NeuralNetwork, trainingSet: TrainingSet, lambda: Double): NeuralNetwork  = {
+  def train(network:NeuralNetwork, trainingSet: TrainingSet): NeuralNetwork  = {
     //Start with random thetas
     val hiddenLayer = (1 to network.hiddenLayer.length) map { x=> Neuron(initThetaForHidden(network)) } toList
     val outputLayer = (1 to network.outputLayer.length) map { x=> Neuron(initThetaForOutput(network)) } toList
 
     val initialNetwork = NeuralNetwork(network.inputLayer, hiddenLayer, outputLayer)
-    val maxIter = 400
-    val lambda = 1.0
-    
     
     customFmin(initialNetwork, trainingSet, maxIter)
 
@@ -78,30 +87,30 @@ case class Trainer() {
   /**
    * Custom Fmin for get the best theta values (Don't use in your projects. Just for educational purpose)
    */
-  def customFmin(network: NeuralNetwork, training: TrainingSet, maxIter: Int) : NeuralNetwork = {
+  def customFmin(network: NeuralNetwork, training: TrainingSet, iteration: Int) : NeuralNetwork = {
     
-    def newNetworkFromGradient(step:Double): NeuralNetwork = {
-      val currCost = costFunction(network, training, 1.0)
-      println("Current cost: "+currCost) //TODO: Lambda
+    def newNetworkFromGradient(stepUsed:Double): NeuralNetwork = {
+      
+      val currCost = costFunction(network, training, lambda)
+      println("Current cost: "+currCost) 
       
       val grad = gradient(network, training)
       
       //Modify theta
       val newNetwork = network.updateThetasWithGradient(grad, step)
-      val newCost = costFunction(newNetwork, training, 1.0)
+      val newCost = costFunction(newNetwork, training, lambda)
       
-      if(newCost > currCost) newNetworkFromGradient(step/2) //step too big 
+      if(newCost > currCost) newNetworkFromGradient(stepUsed/2) //step too big 
       else {
-        println("New cost: "+newCost) //TODO: Lambda
+        println("New cost: "+newCost)
         newNetwork
       }
       
     }
     
-    //TODO: More iterations
-    println("Iter:"+maxIter)
-    if(maxIter==0)network
-    else customFmin(newNetworkFromGradient(0.15), training, maxIter-1)
+    println("Iter:"+iteration)
+    if(iteration==0)network
+    else customFmin(newNetworkFromGradient(step), training, iteration-1)
       
   }
     
@@ -189,7 +198,7 @@ case class Trainer() {
     val grad = finalTheta1_grad:::finalTheta2_grad //TODO: Regularization
     assert(grad.length == (network.inputLayer+1)*network.hiddenLayer.length + 
                         (network.hiddenLayer.length+1)*network.outputLayer.length)
-    grad //TODO: Repasar el gradiente esta mal, devuelve 0 para todas las derivadas de la primera capa
+    grad
   }
     
 }

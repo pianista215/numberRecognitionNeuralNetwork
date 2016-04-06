@@ -6,7 +6,7 @@ import java.io.File
 
 /**
  * Reader object for patterns
- * @author Pianista
+ * @author Unai Sarasola
  */
 object ImageNumberReader {
   
@@ -42,6 +42,12 @@ object ImageNumberReader {
     }
    
     (0 to 9).toList map {x => (x,loadPattern(x))}
+  }
+  
+  def loadImage(name: String): Image = {
+    val img = ImageIO.read(getClass.getResourceAsStream(name))
+    val pixels = img.getRGB(0, 0, img.getWidth, img.getHeight, null, 0, img.getWidth).toList
+    pixels map {x => if(new Color(x).getRed() == 255) 0.0 else 1.0} //White 0 Black 1
   }
   
   

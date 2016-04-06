@@ -2,7 +2,7 @@ package recog
 
 /**
  * Define a Neuron of a Neural network
- * @author Pianista
+ * @author Unai Sarasola
  */
 case class Neuron(theta: List[Double]) {
   
